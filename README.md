@@ -20,7 +20,7 @@ Enrich → cluster → prioritise → route. In the spirit of Enterpret / Viable
 ## Why
 
 Product and engineering teams drown in feedback across a dozen channels. The
-signal — *which recurring problems are actually hurting retention* — is buried in
+signal *which recurring problems are actually hurting retention*  is buried in
 noise. VibeCheck-AI reads every message, structures it, groups recurring issues
 with unsupervised ML, and surfaces a ranked list of what to fix first, routing
 the urgent, churn-driving topics straight to Slack and Jira.
@@ -29,11 +29,11 @@ the urgent, churn-driving topics straight to Slack and Jira.
 
 - **Incremental, density-aware clustering.** A streaming, HDBSCAN-inspired
   clusterer discovers *emerging* topics each night by assigning new tickets to the
-  nearest topic centroid or spawning a new one — **without retraining** a global
+  nearest topic centroid or spawning a new one **without retraining** a global
   model. Provisional clusters are promoted only after reaching a min-size density
   threshold, so singletons never pollute the roadmap.
 - **Deterministic metadata enrichment (guaranteed schema).** Every ticket yields a
-  *valid* structured record — `feature_area`, `bug_severity` (0–5),
+  *valid* structured record `feature_area`, `bug_severity` (0–5),
   `churn_risk`, `sentiment`, … Instructor/Anthropic output is parsed, coerced and
   **repaired** against the schema (clamps bad numbers, fixes bad enums), with a
   deterministic fallback. The pipeline can never emit malformed data.
@@ -43,7 +43,7 @@ the urgent, churn-driving topics straight to Slack and Jira.
 
 ## Proof of scale
 
-- **LLM cache** collapses repetitive feedback into free lookups — the benchmark
+- **LLM cache** collapses repetitive feedback into free lookups the benchmark
   reports the exact **% of enrichment API calls avoided** (typically ~40% on
   realistic data).
 - **Async ingest** decouples webhook latency from enrichment; workers scale
@@ -80,7 +80,7 @@ Top roadmap:
    ...
 ```
 
-> Everything above runs with **no API keys, no Redis, no database server** — the
+> Everything above runs with **no API keys, no Redis, no database server** the
 > platform ships pure-Python defaults (mock enricher, hashing embeddings,
 > in-memory queue, SQLite). Real adapters switch on via environment variables.
 
@@ -93,7 +93,7 @@ vibecheck serve                                   # http://localhost:8000
 ```
 
 - `GET /` — built-in analytics dashboard (React via CDN, no build step)
-- `POST /webhook` — inbound feedback (Zendesk/Intercom/app-store shape)
+- `POST /webhook` inbound feedback (Zendesk/Intercom/app-store shape)
 - `GET /roadmap`, `/clusters`, `/feature-areas`, `/alerts`, `/stats`, `/metrics`
 
 ### Production frontend (Next.js)
@@ -142,7 +142,7 @@ Copy `.env.example` to `.env`. Highlights:
 | `VIBECHECK_QUEUE` | `memory` | `celery` for Redis/RabbitMQ |
 | `VIBECHECK_VECTOR` | `memory` | `qdrant` for scaled vector search |
 | `VIBECHECK_CLUSTER_SIM` | `0.55` | cosine threshold to join a topic |
-| `SLACK_WEBHOOK` / `JIRA_URL` | — | real alert routing |
+| `SLACK_WEBHOOK` / `JIRA_URL` | | real alert routing |
 
 ## Repository layout
 
