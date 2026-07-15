@@ -1,0 +1,41 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "schemaVersion": 39,
+  "title": "VibeCheck-AI Overview",
+  "tags": ["vibecheck"],
+  "timezone": "browser",
+  "time": { "from": "now-6h", "to": "now" },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Tickets ingested (rate/s)",
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 0 },
+      "targets": [{ "expr": "rate(vibecheck_tickets_ingested_total[1m])", "refId": "A" }]
+    },
+    {
+      "type": "stat",
+      "title": "Noise filtered %",
+      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 0 },
+      "targets": [{ "expr": "100 * vibecheck_tickets_noise_total / vibecheck_tickets_ingested_total", "refId": "A" }]
+    },
+    {
+      "type": "stat",
+      "title": "LLM cache hit-rate %",
+      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 0 },
+      "targets": [{ "expr": "100 * vibecheck_cache_hits_total / (vibecheck_cache_hits_total + vibecheck_cache_misses_total)", "refId": "A" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Clusters discovered",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 },
+      "targets": [{ "expr": "vibecheck_clusters_total", "refId": "A" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Alerts routed (Slack/Jira)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 6 },
+      "targets": [{ "expr": "rate(vibecheck_alerts_routed_total[5m])", "refId": "A" }]
+    }
+  ]
+}

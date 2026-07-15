@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vibecheck-web-api
+  labels: { app: vibecheck, component: web-api }
+spec:
+  replicas: 2
+  selector:
+    matchLabels: { app: vibecheck, component: web-api }
+  template:
+    metadata:
+      labels: { app: vibecheck, component: web-api }
+    spec:
+      containers:
+        - name: web-api
+          image: ghcr.io/avase33/vibecheck-ai:latest
+          args: ["vibecheck", "serve", "--host", "0.0.0.0", "--port", "8000", "--db", "/data/vibecheck.db"]
+          ports: [{ containerPort: 8000 }]
+          env:
+            - { name: VIBECHECK_ENV, value: production }
+            - { name: VIBECHECK_QUEUE, value: celery }
+            - { name: REDIS_URL, value: redis://redis:6379/0 }
+            - { name: VIBECHECK_VECTOR, value: qdrant }
+            - { name: QDRANT_URL, value: http://qdrant:6333 }
+          readinessProbe:
+            httpGet: { path: /health, port: 8000 }
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /health, port: 8000 }
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          resources:
+            requests: { cpu: "100m", memory: "256Mi" }
+            limits: { cpu: "500m", memory: "512Mi" }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vibecheck-web-api
+spec:
+  selector: { app: vibecheck, component: web-api }
+  ports:
+    - port: 80
+      targetPort: 8000
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vibecheck-ingestion-worker
+  labels: { app: vibecheck, component: worker }
+spec:
+  replicas: 3
+  selector:
+    matchLabels: { app: vibecheck, component: worker }
+  template:
+    metadata:
+      labels: { app: vibecheck, component: worker }
+    spec:
+      containers:
+        - name: worker
+          image: ghcr.io/avase33/vibecheck-ai:latest
+          command: ["python", "-m", "vibecheck.services.worker_entry"]
+          env:
+            - { name: VIBECHECK_QUEUE, value: celery }
+            - { name: REDIS_URL, value: redis://redis:6379/0 }
+          resources:
+            requests: { cpu: "100m", memory: "256Mi" }
+            limits: { cpu: "500m", memory: "512Mi" }

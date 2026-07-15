@@ -1,0 +1,64 @@
+name: vibecheck
+
+services:
+  web-api:
+    build: .
+    command: ["vibecheck", "serve", "--host", "0.0.0.0", "--port", "8000", "--db", "/data/vibecheck.db"]
+    environment:
+      VIBECHECK_ENV: production
+      VIBECHECK_QUEUE: celery
+      REDIS_URL: redis://redis:6379/0
+      VIBECHECK_VECTOR: qdrant
+      QDRANT_URL: http://qdrant:6333
+      # ANTHROPIC_API_KEY: set in .env for real enrichment
+    ports: ["8000:8000"]
+    volumes: ["vibecheck-data:/data"]
+    depends_on: [redis, qdrant]
+
+  ingestion-worker:
+    build: .
+    command: ["python", "-m", "vibecheck.services.worker_entry"]
+    environment:
+      VIBECHECK_QUEUE: celery
+      REDIS_URL: redis://redis:6379/0
+      VIBECHECK_DB: /data/vibecheck.db
+    volumes: ["vibecheck-data:/data"]
+    depends_on: [redis]
+
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports: ["6333:6333"]
+    volumes: ["qdrant-data:/qdrant/storage"]
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports: ["9090:9090"]
+
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+    volumes:
+      - ./monitoring/grafana-datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml:ro
+      - ./monitoring/grafana-dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml:ro
+      - ./monitoring/grafana-dashboard.json:/var/lib/grafana/dashboards/vibecheck.json:ro
+    ports: ["3001:3000"]
+    depends_on: [prometheus]
+
+  frontend:
+    build: ./frontend
+    environment:
+      NEXT_PUBLIC_API_URL: http://web-api:8000
+    ports: ["3000:3000"]
+    depends_on: [web-api]
+
+volumes:
+  vibecheck-data:
+  qdrant-data:

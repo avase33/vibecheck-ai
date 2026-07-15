@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+env/
+
+# Databases / generated data
+*.db
+*.sqlite3
+*.jsonl
+ci.db
+
+# Node / Next.js
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.env.local
+npm-debug.log*
+
+# Terraform
+infra/.terraform/
+infra/*.tfstate
+infra/*.tfstate.*
+infra/*.tfvars
+
+# Env / secrets
+.env
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/
+
+# Local verification helpers
+verify_vibecheck.py
+run_vibecheck_verify.bat
+run_console.txt
+vibecheck_verify_output.txt
